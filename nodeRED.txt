@@ -1,0 +1,2424 @@
+[
+    {
+        "id": "85c96ff92dbf9b87",
+        "type": "tab",
+        "label": "CPLab 1x2 Dashboard and Comparison",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "4b88393a51228257",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"xBG6\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "",
+        "x": 400,
+        "y": 220,
+        "wires": [
+            [
+                "08da30f1179cd7fb"
+            ]
+        ]
+    },
+    {
+        "id": "08da30f1179cd7fb",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "9500387c60a57d0c",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP_Station_7_Out",
+        "x": 630,
+        "y": 220,
+        "wires": [
+            [
+                "c40102413f2de644"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c40102413f2de644",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Count Function",
+        "func": "var counter = context.get('counter') || 0; \nvar hitobject = context.get(\"hitobject\");\n\nif (hitobject ===undefined) {\n  hitobject = true;\n  context.set('hitobject', hitobject);\n  msg.test = ('set')\n}\n\nif ((msg.payload == true) && (hitobject == true)) {\n  counter ++; \n  hitobject = false;\n  context.set('counter', counter);\n  context.set('hitobject', hitobject);\n  msg.count1 = counter;\n\n}\n\nelse if ((msg.payload == true) && (hitobject == false)) {\n  msg.count1 = counter; \n\n}\n\nelse if ((msg.payload == false) && (hitobject == false)) {\n  hitobject = true; \n  context.set('hitobject', hitobject);\n  msg.test = ('reset');\n  msg.count1 = counter; \n\n}\n\nelse if ((msg.payload == false) && (hitobject == true)) {\n  msg.count1 = counter; \n  \n}\n/*\nmsg._time = new Date();\n\nconst values = [\n  {\n    \"dataPointId\": \"DP-Count\",\n    \"qualityCode\": \"0\",\n    \"value\": `${counter}` \n  }\n];\nmsg._time = new Date();\nmsg.payload=values;*/\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 220,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "6663f7913f612367",
+        "type": "comment",
+        "z": "85c96ff92dbf9b87",
+        "name": "Manager Dashboard Nodes",
+        "info": "This is the managers side of the\ndashboard, however there needs some more\ndata points of other features:\n\n- OEE \n- Predic Time\n- Count (done)\n- Scheduals of productions\n- Logging of team members ",
+        "x": 1000,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "c4be66d1bb96716b",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor1",
+        "x": 400,
+        "y": 300,
+        "wires": [
+            [
+                "c72c63010b359e12"
+            ]
+        ]
+    },
+    {
+        "id": "b3634cc4e0e47ec2",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 1 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\n\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \n\nvar stop_time = context.get(\"stop_time\") || 0;\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (msg.reset == true) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time1 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n    msg.idle_time1  = idle_time; \n\n}\n\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time1 = time_array1\nmsg.run_time1 = clock_value1\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 300,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "0e74a9cf73286c4c",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE/Time Calculation Lab 1",
+        "func": "var prod_count = msg.count1\n\nvar cycle_time1 = msg.cycle_time1\nvar cycle_time2 = msg.cycle_time2\nvar cycle_time3 = msg.cycle_time3\nvar cycle_time4 = msg.cycle_time4\nvar cycle_time5 = msg.cycle_time5\nvar cycle_time6 = msg.cycle_time6\nvar cycle_time7 = msg.cycle_time7\n\nvar idle_time1 = msg.idle_time1\nvar idle_time2 = msg.idle_time2\nvar idle_time3 = msg.idle_time3\nvar idle_time4 = msg.idle_time4\nvar idle_time5 = msg.idle_time5\nvar idle_time6 = msg.idle_time6\nvar idle_time7 = msg.idle_time7\n\nmsg.run_time1\nmsg.run_time2\nmsg.run_time3\nmsg.run_time4\nmsg.run_time5\nmsg.run_time6\nmsg.run_time7\n\n\nvar idle_time_total = context.get(\"idle_time_total\") || 0;\nvar cycle_time_total = context.get(\"run_time_total\") || 0;\nvar run_time_total = context.get(\"run_time_total1\") || 0;\n\nvar OEE = context.get(\"OEE\") || 0;\nvar availability = context.get(\"availability\") || 0;\nvar performance = context.get(\"performance\") || 0;\nvar quality = context.get(\"quality\");\n\nvar availability_loss\nvar performance_loss\nvar quality_loss\n\n//idle time\nidle_time_total = idle_time1 + idle_time2 + idle_time3 + idle_time4 + idle_time5 + idle_time6 + idle_time7\ncontext.set(\"idle_time\", idle_time_total);\n\n//run time\nrun_time_total = msg.run_time1 + msg.run_time2 + msg.run_time3 + msg.run_time4 + msg.run_time5 + msg.run_time6 + msg.run_time7\ncontext.set(\"run_time_total\", run_time_total)\nmsg.test = cycle_time1\n\n//Availability\navailability = (run_time_total)/(run_time_total+idle_time_total)\n\n//Performance\nif ((prod_count >= 1) && (run_time_total >= 1)) {\n    performance = (25 * prod_count) / run_time_total\n}\nelse {\n    performance = 0;\n}\n//quality\nquality = 10/10;\n//OEE\nOEE = (availability * performance * quality) * 100\ncontext.set(\"OEE\", OEE)\n\n//availability Loss \navailability_loss = 1 - availability\n\n//performance loss\nperformance_loss = 1 - performance\n\nif (performance_loss == 1) {\n    performance_loss = 0\n}\nif (availability_loss == 1) {\n    availability_loss = 0\n}\n\n\nmsg.runtime1 = run_time_total\nmsg.idletime1 = idle_time_total\n\n\nmsg.availability = availability * 100\nmsg.performance = performance * 100\nmsg.quality = quality * 100\n\nmsg.availability_loss = availability_loss * 100\nmsg.performance_loss = performance_loss * 100\nmsg.quality_loss = 0\n\nif (msg.reset) {\n    run_time_total = msg.stop1\n    idle_time_total = msg.stop2\n    msg.quality_loss = msg.stop3\n    prod_count = msg.stop4\n    msg.performance_loss = msg.stop5\n    msg.performance = msg.stop6\n    OEE = msg.stop7\n    msg.availability_loss = msg.stop8\n    msg.availability = msg.stop9\n    context.set(\"run_time_total\", run_time_total)\n    context.set(\"idle_time_total\", idle_time_total)\n    context.set(\"msg.quality_loss\", msg.quality.loss)\n    context.set(\"prod_count\", prod_count)\n    context.set(\"msg.performance_loss\", msg.performance_loss)\n    context.set(\"msg.performance\", performance)\n    context.set(\"OEE\", OEE)\n    context.set(\"msg.availability_loss\", msg.availability_loss)\n    context.set(\"msg.availability\", availability)\n}\n\n\nconst values = [\n    {\n        \"dataPointId\": \"DP-Total_run_time\",\n        \"qualityCode\": \"0\",\n        \"value\": `${run_time_total}`\n    },\n    {\n        \"dataPointId\": \"DP-Total_idle_time\",\n        \"qualityCode\": \"0\",\n        \"value\": `${idle_time_total}`\n    },\n    {\n        \"dataPointId\": \"DP-Quality_loss\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.quality_loss}`\n    },\n    {\n        \"dataPointId\": \"DP-Quality\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.quality}`\n    },\n    {\n        \"dataPointId\": \"DP-Production_count\",\n        \"qualityCode\": \"0\",\n        \"value\": `${prod_count}`\n    },\n    {\n        \"dataPointId\": \"DP-Performance_loss\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.performance_loss}`\n    },\n    {\n        \"dataPointId\": \"DP-Performance\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.performance}`\n    },\n    {\n        \"dataPointId\": \"DP-OEE\",\n        \"qualityCode\": \"0\",\n        \"value\": `${OEE}`\n    },\n    {\n        \"dataPointId\": \"DP-Availability_loss\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.availability_loss}`\n    },\n    {\n        \"dataPointId\": \"DP-Availability\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.availability}`\n    }\n];\nmsg._time = new Date();\nmsg.topic = \"cp1\";\nmsg.payload = values;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 700,
+        "wires": [
+            [
+                "ea0447fff3b064c1",
+                "5b4d89b38b9466b3",
+                "bae5d6bda531044d",
+                "dedea783952b51d1",
+                "9b9faaccf446275e",
+                "c78251d8e4fcc27a",
+                "50f660549c2bfe91",
+                "329e6f8d486e9244"
+            ]
+        ]
+    },
+    {
+        "id": "68e87a1d29ed73ab",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor2",
+        "x": 400,
+        "y": 380,
+        "wires": [
+            [
+                "22cef214ca0514c8"
+            ]
+        ]
+    },
+    {
+        "id": "22cef214ca0514c8",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "999b7b41e9f7c6f3",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station_2_Meas",
+        "x": 640,
+        "y": 380,
+        "wires": [
+            [
+                "1c8e4f6324dacb60"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "1c8e4f6324dacb60",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 2 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0; \n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60; \nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \nvar hitobject2 = context.get(\"hitobject2\"); \nvar hitobject3 = context.get(\"hitobject3\"); \n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2); \n}\nif (hitobject3 === undefined) {\n    hitobject3 = true; \n    context.set(\"hitobject3\", hitobject3); \n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time2 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time2  = idle_time; \n    \n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time2 = time_array1\nmsg.run_time2 = clock_value1\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 380,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "1988f9497e011eb1",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor3",
+        "x": 400,
+        "y": 460,
+        "wires": [
+            [
+                "b5184df1ad6c8519"
+            ]
+        ]
+    },
+    {
+        "id": "b5184df1ad6c8519",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "a56a2dedfd8a174b",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station _3_Drill",
+        "x": 640,
+        "y": 460,
+        "wires": [
+            [
+                "47606e33c7562d29"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "47606e33c7562d29",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 3 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0;\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60;\nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60;\nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60;\n\nvar toggle = context.get(\"toggle\") || 0;\n\nvar hitobject1 = context.get(\"hitobject1\");\nvar hitobject2 = context.get(\"hitobject2\");\nvar hitobject3 = context.get(\"hitobject3\");\n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2);\n}\nif (hitobject3 === undefined) {\n    hitobject3 = true;\n    context.set(\"hitobject3\", hitobject3);\n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time3 = idle_time;\n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time3 = idle_time;\n\n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) {\n    hitobject1 = false;\n    context.set(\"hitobject\", hitobject1);\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true;\n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++;\n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1 / 60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n\n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5) {\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n\n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);\n}\n\nmsg.cycle_time3 = time_array1\nmsg.run_time3 = clock_value1\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 460,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "0f8839e1f4b85651",
+        "type": "inject",
+        "z": "85c96ff92dbf9b87",
+        "name": "Activation",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 580,
+        "wires": [
+            [
+                "ca7b10f66bee855f",
+                "1988f9497e011eb1",
+                "68e87a1d29ed73ab",
+                "c4be66d1bb96716b",
+                "204e05efec121b11",
+                "3c909e429b84afce",
+                "0c91296dde1dc593",
+                "4b88393a51228257"
+            ]
+        ]
+    },
+    {
+        "id": "ca7b10f66bee855f",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor4",
+        "x": 400,
+        "y": 540,
+        "wires": [
+            [
+                "556016e237aa0f82"
+            ]
+        ]
+    },
+    {
+        "id": "556016e237aa0f82",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "8ab7f5c25f78e4cc",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station_4_IPICK",
+        "x": 640,
+        "y": 540,
+        "wires": [
+            [
+                "ed6c8df4a77d983e"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ed6c8df4a77d983e",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 4 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0;\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60;\nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60;\nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60;\n\nvar toggle = context.get(\"toggle\") || 0;\n\nvar hitobject1 = context.get(\"hitobject1\");\nvar hitobject2 = context.get(\"hitobject2\");\nvar hitobject3 = context.get(\"hitobject3\");\n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2);\n}\nif (hitobject3 === undefined) {\n    hitobject3 = true;\n    context.set(\"hitobject3\", hitobject3);\n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time4 = idle_time;\n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time4 = idle_time;\n\n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) {\n    hitobject1 = false;\n    context.set(\"hitobject\", hitobject1);\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true;\n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++;\n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1 / 60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n\n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5) {\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n\n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);\n}\n\nmsg.cycle_time4 = time_array1\nmsg.run_time4 = clock_value1\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 540,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "204e05efec121b11",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor5",
+        "x": 400,
+        "y": 620,
+        "wires": [
+            [
+                "a279613b58f714de"
+            ]
+        ]
+    },
+    {
+        "id": "a279613b58f714de",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "733370d575c25424",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station_5_BM",
+        "x": 630,
+        "y": 620,
+        "wires": [
+            [
+                "5296087531c1911a"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "5296087531c1911a",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 5 Function ",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0;\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60;\nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60;\nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60;\n\nvar toggle = context.get(\"toggle\") || 0;\n\nvar hitobject1 = context.get(\"hitobject1\");\nvar hitobject2 = context.get(\"hitobject2\");\nvar hitobject3 = context.get(\"hitobject3\");\n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2);\n}\nif (hitobject3 === undefined) {\n    hitobject3 = true;\n    context.set(\"hitobject3\", hitobject3);\n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time5 = idle_time;\n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time5 = idle_time;\n\n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) {\n    hitobject1 = false;\n    context.set(\"hitobject\", hitobject1);\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true;\n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++;\n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1 / 60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n\n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5) {\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n\n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);\n}\n\nmsg.cycle_time5 = time_array1\nmsg.run_time5 = clock_value1\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 620,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "3c909e429b84afce",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor6",
+        "x": 400,
+        "y": 700,
+        "wires": [
+            [
+                "58513de00bb7ac4c"
+            ]
+        ]
+    },
+    {
+        "id": "58513de00bb7ac4c",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "1da8a1c27cea1862",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station_6_Press",
+        "x": 640,
+        "y": 700,
+        "wires": [
+            [
+                "d86003c096001e9c"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "d86003c096001e9c",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 6 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0; \n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60; \nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \nvar hitobject2 = context.get(\"hitobject2\"); \nvar hitobject3 = context.get(\"hitobject3\"); \n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2); \n}\nif (hitobject3 === undefined) {\n    hitobject3 = true; \n    context.set(\"hitobject3\", hitobject3); \n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time6 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time6  = idle_time; \n    \n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time6 = time_array1\nmsg.run_time6 = clock_value1\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 700,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "0c91296dde1dc593",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor7",
+        "x": 400,
+        "y": 780,
+        "wires": [
+            [
+                "2f506ac5bd63457a"
+            ]
+        ]
+    },
+    {
+        "id": "2f506ac5bd63457a",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "9500387c60a57d0c",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station_7_Out",
+        "x": 640,
+        "y": 780,
+        "wires": [
+            [
+                "d6d4ed7e6c31270a"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "d6d4ed7e6c31270a",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 7 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0; \n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60; \nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \nvar hitobject2 = context.get(\"hitobject2\"); \nvar hitobject3 = context.get(\"hitobject3\"); \n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2); \n}\nif (hitobject3 === undefined) {\n    hitobject3 = true; \n    context.set(\"hitobject3\", hitobject3); \n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time7 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time7  = idle_time; \n    \n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time7 = time_array1\nmsg.run_time7 = clock_value1\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 780,
+        "wires": [
+            [
+                "5f18e74d21b63540"
+            ]
+        ]
+    },
+    {
+        "id": "c72c63010b359e12",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "2ad94cefa363da14",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "name": "CP1_Station_1_FM",
+        "x": 630,
+        "y": 300,
+        "wires": [
+            [
+                "b3634cc4e0e47ec2"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "5f18e74d21b63540",
+        "type": "join",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "",
+        "propertyType": "full",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": true,
+        "accumulate": false,
+        "timeout": ".5",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1170,
+        "y": 500,
+        "wires": [
+            [
+                "0e74a9cf73286c4c"
+            ]
+        ]
+    },
+    {
+        "id": "ea0447fff3b064c1",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-OEE\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1580,
+        "y": 460,
+        "wires": [
+            [
+                "b2272713d2b6f88a"
+            ]
+        ]
+    },
+    {
+        "id": "b2272713d2b6f88a",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE",
+        "group": "a859cf24de817a6f",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "OEE",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2130,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "bae5d6bda531044d",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Total Idle Time Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Total_idle_time\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 280,
+        "wires": [
+            [
+                "f3291881d2d9e53a"
+            ]
+        ]
+    },
+    {
+        "id": "5b4d89b38b9466b3",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Total Run Time Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Total_run_time\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 220,
+        "wires": [
+            [
+                "dc18b8285ee2d984"
+            ]
+        ]
+    },
+    {
+        "id": "dc18b8285ee2d984",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "a859cf24de817a6f",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Total Run Time",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2160,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "f3291881d2d9e53a",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "a859cf24de817a6f",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Total Idle Time",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2160,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "9b9faaccf446275e",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Performance Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Performance\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 400,
+        "wires": [
+            [
+                "94b0f843a4c85542"
+            ]
+        ]
+    },
+    {
+        "id": "c78251d8e4fcc27a",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Availability Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Availability\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1600,
+        "y": 520,
+        "wires": [
+            [
+                "d9a201fd77ceeeda"
+            ]
+        ]
+    },
+    {
+        "id": "dedea783952b51d1",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Product Count Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Production_count\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 340,
+        "wires": [
+            [
+                "a62953f37a81558b"
+            ]
+        ]
+    },
+    {
+        "id": "a62953f37a81558b",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "a859cf24de817a6f",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Production Count",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2170,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "94b0f843a4c85542",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "a859cf24de817a6f",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Performance",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2150,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "d9a201fd77ceeeda",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "a859cf24de817a6f",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Availability",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2150,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "5e6e9b5864916fe0",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"xBG6\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "",
+        "x": 400,
+        "y": 860,
+        "wires": [
+            [
+                "357be4881c3185d0"
+            ]
+        ]
+    },
+    {
+        "id": "357be4881c3185d0",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "9500387c60a57d0c",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_7_Out",
+        "x": 640,
+        "y": 860,
+        "wires": [
+            [
+                "ad0838e21cf2f1e4"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ad0838e21cf2f1e4",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Count Function",
+        "func": "var counter = context.get('counter') || 0; \nvar hitobject = context.get(\"hitobject\");\n\nif (hitobject ===undefined) {\n  hitobject = true;\n  context.set('hitobject', hitobject);\n  msg.test = ('set')\n}\n\nif ((msg.payload == true) && (hitobject == true)) {\n  counter ++; \n  hitobject = false;\n  context.set('counter', counter);\n  context.set('hitobject', hitobject);\n  msg.count1 = counter;\n\n}\n\nelse if ((msg.payload == true) && (hitobject == false)) {\n  msg.count1 = counter; \n\n}\n\nelse if ((msg.payload == false) && (hitobject == false)) {\n  hitobject = true; \n  context.set('hitobject', hitobject);\n  msg.test = ('reset');\n  msg.count1 = counter; \n\n}\n\nelse if ((msg.payload == false) && (hitobject == true)) {\n  msg.count1 = counter; \n  \n}\n/*\nmsg._time = new Date();\n\nconst values = [\n  {\n    \"dataPointId\": \"DP-Count\",\n    \"qualityCode\": \"0\",\n    \"value\": `${counter}` \n  }\n];\nmsg._time = new Date();\nmsg.payload=values;*/\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 860,
+        "y": 860,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "d619506533d13ca1",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor8",
+        "x": 400,
+        "y": 940,
+        "wires": [
+            [
+                "d38c81c7138af965"
+            ]
+        ]
+    },
+    {
+        "id": "74b7ba3e1afe6ba6",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 1 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\n\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \n\nvar stop_time = context.get(\"stop_time\") || 0;\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (msg.reset == true) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time1 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n    msg.idle_time1  = idle_time; \n\n}\n\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time1 = time_array1\nmsg.run_time1 = clock_value1\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 940,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "9f7d2ccb8d39acb0",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE/Time Calculation Lab 2",
+        "func": "var prod_count = msg.count1\n\nvar cycle_time1 = msg.cycle_time1\nvar cycle_time2 = msg.cycle_time2\nvar cycle_time3 = msg.cycle_time3\nvar cycle_time4 = msg.cycle_time4\nvar cycle_time5 = msg.cycle_time5\nvar cycle_time6 = msg.cycle_time6\nvar cycle_time7 = msg.cycle_time7\n\nvar idle_time1 = msg.idle_time1\nvar idle_time2 = msg.idle_time2\nvar idle_time3 = msg.idle_time3\nvar idle_time4 = msg.idle_time4\nvar idle_time5 = msg.idle_time5\nvar idle_time6 = msg.idle_time6\nvar idle_time7 = msg.idle_time7\n\nmsg.run_time1\nmsg.run_time2\nmsg.run_time3\nmsg.run_time4\nmsg.run_time5\nmsg.run_time6\nmsg.run_time7\n\n\nvar idle_time_total = context.get(\"idle_time_total\") || 0;\nvar cycle_time_total = context.get(\"run_time_total\") || 0;\nvar run_time_total = context.get(\"run_time_total1\") || 0;\n\nvar OEE = context.get(\"OEE\") || 0;\nvar availability = context.get(\"availability\") || 0;\nvar performance = context.get(\"performance\") || 0;\nvar quality = context.get(\"quality\");\n\nvar availability_loss\nvar performance_loss\nvar quality_loss\n\n//idle time\nidle_time_total = idle_time1 + idle_time2 + idle_time3 + idle_time4 + idle_time5 + idle_time6 + idle_time7\ncontext.set(\"idle_time\", idle_time_total);\n\n//run time\nrun_time_total = msg.run_time1 + msg.run_time2 + msg.run_time3 + msg.run_time4 + msg.run_time5 + msg.run_time6 + msg.run_time7\ncontext.set(\"run_time_total\", run_time_total)\nmsg.test = cycle_time1\n\n//Availability\navailability = (run_time_total) / (run_time_total + idle_time_total)\n\n//Performance\nif ((prod_count >= 1) && (run_time_total >= 1)) {\n    performance = (25 * prod_count) / run_time_total\n}\nelse {\n    performance = 0;\n}\n\n//quality \nquality = 10 / 10\n\n//OEE\nOEE = (availability * performance * quality) * 100\ncontext.set(\"OEE\", OEE)\n\n//availability Loss \navailability_loss = 1 - availability\n\n//performance loss\nperformance_loss = 1 - performance\n\nif (performance_loss == 1) {\n    performance_loss = 0\n}\nif (availability_loss == 1) {\n    availability_loss = 0\n}\n\n\nmsg.runtime1 = run_time_total\nmsg.idletime1 = idle_time_total\n\n\nmsg.OEE = OEE\nmsg.availability = availability * 100\nmsg.performance = performance * 100\nmsg.quality = quality * 100\n\nmsg.availability_loss = availability_loss * 100\nmsg.performance_loss = performance_loss * 100\nmsg.quality_loss = 0\n\nif (msg.reset) {\n    run_time_total = msg.stop1\n    idle_time_total = msg.stop2\n    msg.quality_loss = msg.stop3\n    prod_count = msg.stop4\n    msg.performance_loss = msg.stop5\n    msg.performance = msg.stop6\n    OEE = msg.stop7\n    msg.availability_loss = msg.stop8\n    msg.availability = msg.stop9\n    context.set(\"run_time_total\", run_time_total)\n    context.set(\"idle_time_total\", idle_time_total)\n    context.set(\"msg.quality_loss\", msg.quality.loss)\n    context.set(\"prod_count\", prod_count)\n    context.set(\"msg.performance_loss\", msg.performance_loss)\n    context.set(\"msg.performance\", performance)\n    context.set(\"OEE\", OEE)\n    context.set(\"msg.availability_loss\", msg.availability_loss)\n    context.set(\"msg.availability\", availability)\n}\n\n\nconst values = [\n    {\n        \"dataPointId\": \"DP-Total_run_time\",\n        \"qualityCode\": \"0\",\n        \"value\": `${run_time_total}`\n    },\n    {\n        \"dataPointId\": \"DP-Total_idle_time\",\n        \"qualityCode\": \"0\",\n        \"value\": `${idle_time_total}`\n    },\n    {\n        \"dataPointId\": \"DP-Quality_loss\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.quality_loss}`\n    },\n    {\n        \"dataPointId\": \"DP-Quality\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.quality}`\n    },\n    {\n        \"dataPointId\": \"DP-Production_count\",\n        \"qualityCode\": \"0\",\n        \"value\": `${prod_count}`\n    },\n    {\n        \"dataPointId\": \"DP-Performance_loss\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.performance_loss}`\n    },\n    {\n        \"dataPointId\": \"DP-Performance\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.performance}`\n    },\n    {\n        \"dataPointId\": \"DP-OEE\",\n        \"qualityCode\": \"0\",\n        \"value\": `${OEE}`\n    },\n    {\n        \"dataPointId\": \"DP-Availability_loss\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.availability_loss}`\n    },\n    {\n        \"dataPointId\": \"DP-Availability\",\n        \"qualityCode\": \"0\",\n        \"value\": `${msg.availability}`\n    }\n];\nmsg._time = new Date();\nmsg.topic=\"cp2\";\nmsg.payload = values;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1280,
+        "y": 960,
+        "wires": [
+            [
+                "4139b66b21e67a5e",
+                "c2d7c3c19536e812",
+                "1efb1bbc046aad4b",
+                "1a94173b046b0c94",
+                "7b5dfde41e0c5a2e",
+                "911e7a6473452393",
+                "50f660549c2bfe91",
+                "057234f67773c238"
+            ]
+        ]
+    },
+    {
+        "id": "38d4aaec1b46fbf1",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor9",
+        "x": 400,
+        "y": 1020,
+        "wires": [
+            [
+                "58c067dcb10b6e9a"
+            ]
+        ]
+    },
+    {
+        "id": "58c067dcb10b6e9a",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "999b7b41e9f7c6f3",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_2_Meas",
+        "x": 640,
+        "y": 1020,
+        "wires": [
+            [
+                "ecd7ef83ea9d08fa"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "ecd7ef83ea9d08fa",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 2 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0; \n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60; \nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \nvar hitobject2 = context.get(\"hitobject2\"); \nvar hitobject3 = context.get(\"hitobject3\"); \n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2); \n}\nif (hitobject3 === undefined) {\n    hitobject3 = true; \n    context.set(\"hitobject3\", hitobject3); \n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time2 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time2  = idle_time; \n    \n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time2 = time_array1\nmsg.run_time2 = clock_value1\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1020,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "8fd637aacc86212e",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor10",
+        "x": 400,
+        "y": 1100,
+        "wires": [
+            [
+                "23ac40951b950f86"
+            ]
+        ]
+    },
+    {
+        "id": "23ac40951b950f86",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "a56a2dedfd8a174b",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station _3_Drill",
+        "x": 640,
+        "y": 1100,
+        "wires": [
+            [
+                "4ab2f0bd1302eb3b"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "4ab2f0bd1302eb3b",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 3 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0;\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60;\nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60;\nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60;\n\nvar toggle = context.get(\"toggle\") || 0;\n\nvar hitobject1 = context.get(\"hitobject1\");\nvar hitobject2 = context.get(\"hitobject2\");\nvar hitobject3 = context.get(\"hitobject3\");\n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2);\n}\nif (hitobject3 === undefined) {\n    hitobject3 = true;\n    context.set(\"hitobject3\", hitobject3);\n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time3 = idle_time;\n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time3 = idle_time;\n\n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) {\n    hitobject1 = false;\n    context.set(\"hitobject\", hitobject1);\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true;\n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++;\n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1 / 60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n\n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5) {\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n\n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);\n}\n\nmsg.cycle_time3 = time_array1\nmsg.run_time3 = clock_value1\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1100,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "a83a44eb9fc1a3f4",
+        "type": "inject",
+        "z": "85c96ff92dbf9b87",
+        "name": "Activation",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "2",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 1220,
+        "wires": [
+            [
+                "1c1ea4521ffa569a",
+                "8fd637aacc86212e",
+                "38d4aaec1b46fbf1",
+                "d619506533d13ca1",
+                "f409c20b3f168731",
+                "04edd9a074cbdca3",
+                "3f0ec4adc3940990",
+                "5e6e9b5864916fe0"
+            ]
+        ]
+    },
+    {
+        "id": "1c1ea4521ffa569a",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor11",
+        "x": 400,
+        "y": 1180,
+        "wires": [
+            [
+                "ef6ea5325067e0de"
+            ]
+        ]
+    },
+    {
+        "id": "ef6ea5325067e0de",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "8ab7f5c25f78e4cc",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_4_IPICK",
+        "x": 640,
+        "y": 1180,
+        "wires": [
+            [
+                "5a4d623a9f09cc75"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "5a4d623a9f09cc75",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 4 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0;\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60;\nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60;\nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60;\n\nvar toggle = context.get(\"toggle\") || 0;\n\nvar hitobject1 = context.get(\"hitobject1\");\nvar hitobject2 = context.get(\"hitobject2\");\nvar hitobject3 = context.get(\"hitobject3\");\n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2);\n}\nif (hitobject3 === undefined) {\n    hitobject3 = true;\n    context.set(\"hitobject3\", hitobject3);\n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time4 = idle_time;\n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time4 = idle_time;\n\n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) {\n    hitobject1 = false;\n    context.set(\"hitobject\", hitobject1);\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true;\n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++;\n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1 / 60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n\n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5) {\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n\n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);\n}\n\nmsg.cycle_time4 = time_array1\nmsg.run_time4 = clock_value1\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1180,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "f409c20b3f168731",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor12",
+        "x": 400,
+        "y": 1260,
+        "wires": [
+            [
+                "60722950d57089fd"
+            ]
+        ]
+    },
+    {
+        "id": "60722950d57089fd",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "733370d575c25424",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_5_BM",
+        "x": 630,
+        "y": 1260,
+        "wires": [
+            [
+                "776eef625a68e366"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "776eef625a68e366",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 5 Function ",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0;\n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60;\nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60;\nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60;\n\nvar toggle = context.get(\"toggle\") || 0;\n\nvar hitobject1 = context.get(\"hitobject1\");\nvar hitobject2 = context.get(\"hitobject2\");\nvar hitobject3 = context.get(\"hitobject3\");\n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2);\n}\nif (hitobject3 === undefined) {\n    hitobject3 = true;\n    context.set(\"hitobject3\", hitobject3);\n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time5 = idle_time;\n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time5 = idle_time;\n\n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) {\n    hitobject1 = false;\n    context.set(\"hitobject\", hitobject1);\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true;\n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) {\n    hitobject1 = true;\n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++;\n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1 / 60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n\n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5) {\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n\n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);\n}\n\nmsg.cycle_time5 = time_array1\nmsg.run_time5 = clock_value1\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1260,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "04edd9a074cbdca3",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor13",
+        "x": 400,
+        "y": 1340,
+        "wires": [
+            [
+                "02f8d431ffdd04ab"
+            ]
+        ]
+    },
+    {
+        "id": "02f8d431ffdd04ab",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "1da8a1c27cea1862",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_6_Press",
+        "x": 640,
+        "y": 1340,
+        "wires": [
+            [
+                "c59162da472b111b"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c59162da472b111b",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 6 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0; \n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60; \nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \nvar hitobject2 = context.get(\"hitobject2\"); \nvar hitobject3 = context.get(\"hitobject3\"); \n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2); \n}\nif (hitobject3 === undefined) {\n    hitobject3 = true; \n    context.set(\"hitobject3\", hitobject3); \n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time6 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time6  = idle_time; \n    \n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time6 = time_array1\nmsg.run_time6 = clock_value1\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1340,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "3f0ec4adc3940990",
+        "type": "OpcUa-Item",
+        "z": "85c96ff92dbf9b87",
+        "item": "ns=3;s=\"Rfid1_IN\".\"xTagPresent\"",
+        "datatype": "Boolean",
+        "value": "",
+        "name": "RFID Sensor14",
+        "x": 400,
+        "y": 1420,
+        "wires": [
+            [
+                "33760aa98b781733"
+            ]
+        ]
+    },
+    {
+        "id": "33760aa98b781733",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "9500387c60a57d0c",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_7_Out",
+        "x": 640,
+        "y": 1420,
+        "wires": [
+            [
+                "b955044d1cf8f430"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "b955044d1cf8f430",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Station 7 Function",
+        "func": "msg.s2 = msg.payload;\n\n\nlet clock_value1 = flow.get(\"clock_value1\") || 0;\nlet clock_value2 = flow.get(\"clock_value2\") || 0;\nlet clock_value3 = flow.get(\"clock_value3\") || 0; \n\nlet mins1 = Math.floor(clock_value1 / 60);\nlet secs1 = clock_value1 % 60; \nlet mins2 = Math.floor(clock_value2 / 60);\nlet secs2 = clock_value2 % 60; \nlet mins3 = Math.floor(clock_value3 / 60);\nlet secs3 = clock_value3 % 60; \n\nvar toggle = context.get(\"toggle\") || 0; \n\nvar hitobject1 = context.get(\"hitobject1\"); \nvar hitobject2 = context.get(\"hitobject2\"); \nvar hitobject3 = context.get(\"hitobject3\"); \n\nvar idle_time = context.get(\"idle_time\") || 0;\n\n\nif (hitobject1 === undefined) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\nif (hitobject2 === undefined) {\n    hitobject2 = true;\n    context.set(\"hitobject2\", hitobject2); \n}\nif (hitobject3 === undefined) {\n    hitobject3 = true; \n    context.set(\"hitobject3\", hitobject3); \n}\n\nif (msg.reset) {\n    clock_value1 = 0\n    context.set(\"clock_value1\", clock_value1)\n}\n\nif (msg.s2 == false) {\n    idle_time++;\n    msg.idle_time7 = idle_time; \n    context.set(\"idle_time\", idle_time);\n}\n\nif (msg.s2 == true) {\n\n    msg.idle_time7  = idle_time; \n    \n}\nif ((msg.s2 == true) && (hitobject1 == true)) {\n    toggle = 1;\n    hitobject1 = false;\n    context.set(\"toggle\", toggle); \n    context.set(\"hitobject1\", hitobject1);\n    msg.msg1 = (\"Toggle 'ON'\")\n\n}\nelse if ((msg.s2 == true) && (hitobject1 == false)) { \n    hitobject1 = false; \n    context.set(\"hitobject\", hitobject1);\n}\n    \nelse if ((msg.s2 == false) && (hitobject1 == false)) {\n    toggle = 0;\n    hitobject1 = true; \n    flow.get(\"toggle\")\n    msg.time1 = clock_value1\n    context.set(\"toggle\", toggle);\n    context.set(\"hitobject1\", hitobject1);\n    msg.msg2 = (\"Toggle 'OFF'\")\n\n}\n\nelse if ((msg.s2 == false) && (hitobject1 == true)) { \n    hitobject1 = true; \n    context.set(\"hitobject1\", hitobject1);\n}\n\nif (toggle == 1) {\n    clock_value1++; \n\n    if (clock_value1 < 0) clock_value1 = 0;\n\n    flow.set(\"clock_value1\", clock_value1);\n    msg.sec1 = clock_value1\n    let mins = Math.floor(clock_value1/60);\n    let secs = clock_value1 % 60;\n\n    msg.time = (mins + (secs / 100.0)).toFixed(2)\n    msg.time = Number(msg.time);\n    \n}\n\nvar time1 = msg.time1\nvar toggle1 = context.get(\"toggle1\");\nvar time_array1 = context.get(\"time_array1\");\n\nif (toggle1 === undefined) {\n    toggle1 = 0;\n    context.set(\"toggle1\", toggle1);\n}\n\nif (time_array1 === undefined) {\n    time_array1 = [0, 0, 0, 0, 0]\n    context.set(\"time_array1\", time_array1);\n}\n\nif ((time1 >= 1) && (time_array1[0] < 1) && (toggle1 == 0)) {\n    toggle1 = 1;\n    time_array1[0] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[1] < 1) && (toggle1 == 1)) {\n    toggle1 = 2;\n    time_array1[1] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[2] < 1) && (toggle1 == 2)) {\n    toggle1 = 3;\n    time_array1[2] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[3] < 1) && (toggle1 == 3)) {\n    toggle1 = 4;\n    time_array1[3] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if ((time1 >= 1) && (time_array1[4] < 1) && (toggle1 == 4)) {\n    toggle1 = 5;\n    time_array1[4] = time1;\n    context.set(\"toggle1\", toggle1);\n}\n\nelse if (toggle1 == 5){\n    toggle1 = 6;\n    context.set(\"toggle1\", toggle1);\n    \n}\n\nif (toggle1 == 6) {\n    toggle1 = 0;\n    time_array1 = [0, 0, 0, 0, 0];\n    context.set(\"time_array1\", time_array1);\n    context.set(\"toggle1\", toggle1);  \n}\n\nmsg.cycle_time7 = time_array1\nmsg.run_time7 = clock_value1\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 870,
+        "y": 1420,
+        "wires": [
+            [
+                "c8dd0bb4d1a23bdb"
+            ]
+        ]
+    },
+    {
+        "id": "d38c81c7138af965",
+        "type": "OpcUa-Client",
+        "z": "85c96ff92dbf9b87",
+        "endpoint": "2ad94cefa363da14",
+        "action": "read",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "CP2_Station_1_FM",
+        "x": 630,
+        "y": 940,
+        "wires": [
+            [
+                "74b7ba3e1afe6ba6"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c8dd0bb4d1a23bdb",
+        "type": "join",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "mode": "custom",
+        "build": "merged",
+        "property": "",
+        "propertyType": "full",
+        "key": "topic",
+        "joiner": "\\n",
+        "joinerType": "str",
+        "useparts": true,
+        "accumulate": false,
+        "timeout": ".5",
+        "count": "",
+        "reduceRight": false,
+        "reduceExp": "",
+        "reduceInit": "",
+        "reduceInitType": "",
+        "reduceFixup": "",
+        "x": 1170,
+        "y": 1140,
+        "wires": [
+            [
+                "9f7d2ccb8d39acb0"
+            ]
+        ]
+    },
+    {
+        "id": "4139b66b21e67a5e",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-OEE\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1600,
+        "y": 1160,
+        "wires": [
+            [
+                "2593546d69f5784b"
+            ]
+        ]
+    },
+    {
+        "id": "2593546d69f5784b",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE",
+        "group": "0a1dba116021863c",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "OEE",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2150,
+        "y": 1160,
+        "wires": []
+    },
+    {
+        "id": "1efb1bbc046aad4b",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE Total Idle Time Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Total_idle_time\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1650,
+        "y": 1220,
+        "wires": [
+            [
+                "ce519acd80e48eb2"
+            ]
+        ]
+    },
+    {
+        "id": "c2d7c3c19536e812",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Total Run Time Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Total_run_time\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1630,
+        "y": 1100,
+        "wires": [
+            [
+                "cb5c338fc68bc3fd"
+            ]
+        ]
+    },
+    {
+        "id": "cb5c338fc68bc3fd",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "0a1dba116021863c",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Total Run Time",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2180,
+        "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "ce519acd80e48eb2",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "0a1dba116021863c",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Total Idle Time",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2180,
+        "y": 1220,
+        "wires": []
+    },
+    {
+        "id": "7b5dfde41e0c5a2e",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Performance Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Performance\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1630,
+        "y": 1360,
+        "wires": [
+            [
+                "07bd360a0a684fbb"
+            ]
+        ]
+    },
+    {
+        "id": "911e7a6473452393",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Availability Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Availability\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1620,
+        "y": 1420,
+        "wires": [
+            [
+                "ae292bef16217b93"
+            ]
+        ]
+    },
+    {
+        "id": "1a94173b046b0c94",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Product Count Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Production_count\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1630,
+        "y": 1300,
+        "wires": [
+            [
+                "ba30eebbe94700b4"
+            ]
+        ]
+    },
+    {
+        "id": "ba30eebbe94700b4",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "0a1dba116021863c",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Production Count",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2190,
+        "y": 1300,
+        "wires": []
+    },
+    {
+        "id": "07bd360a0a684fbb",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "0a1dba116021863c",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Performance",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2170,
+        "y": 1360,
+        "wires": []
+    },
+    {
+        "id": "ae292bef16217b93",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "0a1dba116021863c",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Availability",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2170,
+        "y": 1420,
+        "wires": []
+    },
+    {
+        "id": "50f660549c2bfe91",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Lab Comparison Calculation",
+        "func": "// Positions to compare\nconst compareIndexes = [0, 1, 3, 4, 6, 7, 9];\n// Store incoming payloads by topic\nif (msg.topic === \"cp1\") {\n    context.set(\"cp1\", msg.payload);\n} else if (msg.topic === \"cp2\") {\n    context.set(\"cp2\", msg.payload);\n}\n// Get both stored arrays\nlet cp1 = context.get(\"cp1\");\nlet cp2 = context.get(\"cp2\");\n// Proceed only if both arrays are available\nif (cp1 && cp2) {\n    let result = [];\n    for (let i of compareIndexes) {\n        let obj1 = cp1[i];\n        let obj2 = cp2[i];\n        // Extract and convert 'value' to number\n        let val1 = parseFloat(obj1.value);\n        let val2 = parseFloat(obj2.value);\n        if(i==4){\n            result.push({\n                index: i,\n                cp1Value: val1,\n                cp2Value: val2,\n                difference: val1 + val2,\n                dataPointId: obj1.dataPointId  // assuming IDs match, or you want to label result\n            })\n        }else{\n        result.push({\n            index: i,\n            cp1Value: val1,\n            cp2Value: val2,\n            difference: val1 - val2,\n            dataPointId: obj1.dataPointId  // assuming IDs match, or you want to label result\n        });\n        }\n    }\n    // Optionally reset context\n    context.set(\"cp1\", null);\n    context.set(\"cp2\", null);\n    // Return the result array\n    return { payload: result };\n}\nreturn {payload:\"Waiting for both cp1 and cp2\"}; // If both haven't arrived yet",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1560,
+        "y": 820,
+        "wires": [
+            [
+                "6078e5581a9daf69"
+            ]
+        ]
+    },
+    {
+        "id": "6078e5581a9daf69",
+        "type": "split",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": true,
+        "addname": "",
+        "property": "payload",
+        "x": 1750,
+        "y": 820,
+        "wires": [
+            [
+                "11a7e48abea359ba"
+            ]
+        ]
+    },
+    {
+        "id": "583efb839e446dc2",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "OEE",
+        "group": "b08e50bf55bfa911",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "OEE",
+        "label": "%",
+        "format": "",
+        "min": "-100",
+        "max": "100",
+        "colors": [
+            "#0033ff",
+            "#ffffff",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": true,
+        "className": "",
+        "x": 2410,
+        "y": 820,
+        "wires": []
+    },
+    {
+        "id": "2732258b6cf8e5a6",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "b08e50bf55bfa911",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Total Production Count",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2460,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "3023d67831cb8f66",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "b08e50bf55bfa911",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Performance",
+        "label": "%",
+        "format": "",
+        "min": "-100",
+        "max": "100",
+        "colors": [
+            "#0033ff",
+            "#ffffff",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": true,
+        "className": "",
+        "x": 2430,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "8264383274c3c552",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "b08e50bf55bfa911",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Availability",
+        "label": "%",
+        "format": "",
+        "min": "-100",
+        "max": "100",
+        "colors": [
+            "#0033ff",
+            "#ffffff",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": true,
+        "className": "",
+        "x": 2430,
+        "y": 880,
+        "wires": []
+    },
+    {
+        "id": "11a7e48abea359ba",
+        "type": "switch",
+        "z": "85c96ff92dbf9b87",
+        "name": "MSG Splitter",
+        "property": "payload.dataPointId",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "DP-Production_count",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "DP-Performance",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "DP-OEE",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "DP-Availability",
+                "vt": "str"
+            },
+            {
+                "t": "eq",
+                "v": "DP-Quality",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 5,
+        "x": 1890,
+        "y": 820,
+        "wires": [
+            [
+                "2ce115fe66f6aec3"
+            ],
+            [
+                "a6f7cd0b97014877"
+            ],
+            [
+                "80288c6b4ec42ce6"
+            ],
+            [
+                "3fbc450b707ac3a6"
+            ],
+            [
+                "e790f3a09715be77"
+            ]
+        ]
+    },
+    {
+        "id": "2ce115fe66f6aec3",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Difference Extraction",
+        "func": "msg.payload = msg.payload.difference;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2200,
+        "y": 700,
+        "wires": [
+            [
+                "2732258b6cf8e5a6"
+            ]
+        ]
+    },
+    {
+        "id": "a6f7cd0b97014877",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Difference Extraction",
+        "func": "msg.payload = msg.payload.difference;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2200,
+        "y": 760,
+        "wires": [
+            [
+                "3023d67831cb8f66"
+            ]
+        ]
+    },
+    {
+        "id": "80288c6b4ec42ce6",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Difference Extraction",
+        "func": "msg.payload = msg.payload.difference;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2200,
+        "y": 820,
+        "wires": [
+            [
+                "583efb839e446dc2"
+            ]
+        ]
+    },
+    {
+        "id": "3fbc450b707ac3a6",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Difference Extraction",
+        "func": "msg.payload = msg.payload.difference;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2200,
+        "y": 880,
+        "wires": [
+            [
+                "8264383274c3c552"
+            ]
+        ]
+    },
+    {
+        "id": "329e6f8d486e9244",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Quality Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Quality\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1590,
+        "y": 580,
+        "wires": [
+            [
+                "0fe2341159196017"
+            ]
+        ]
+    },
+    {
+        "id": "0fe2341159196017",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "a859cf24de817a6f",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Quality",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2140,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "057234f67773c238",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Quality Extraction",
+        "func": "// Target dataPointId to find\nconst targetDataPointId = \"DP-Quality\";\n\n// Use Array.prototype.find to get the object with the specific dataPointId\nconst selectedObject = msg.payload.find(item => item.dataPointId === targetDataPointId);\n\n// Check if the object was found\nif (selectedObject) {\n    // If found, assign the value of the object to msg.payload\n    msg.payload = selectedObject.value;\n} else {\n    // If not found, set an error message or empty object\n    msg.payload = { error: `Object with dataPointId ${targetDataPointId} not found` };\n}\n\n// Output the msg with the extracted value or error message\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1610,
+        "y": 1480,
+        "wires": [
+            [
+                "9252916a439dae1c"
+            ]
+        ]
+    },
+    {
+        "id": "9252916a439dae1c",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "0a1dba116021863c",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Quality",
+        "label": "%",
+        "format": "",
+        "min": 0,
+        "max": "100",
+        "colors": [
+            "#b30000",
+            "#e6e600",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": false,
+        "className": "",
+        "x": 2160,
+        "y": 1480,
+        "wires": []
+    },
+    {
+        "id": "e790f3a09715be77",
+        "type": "function",
+        "z": "85c96ff92dbf9b87",
+        "name": "Difference Extraction",
+        "func": "msg.payload = msg.payload.difference;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2200,
+        "y": 940,
+        "wires": [
+            [
+                "9dcbafada0525ff9"
+            ]
+        ]
+    },
+    {
+        "id": "9dcbafada0525ff9",
+        "type": "ui_gauge",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "group": "b08e50bf55bfa911",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Quality",
+        "label": "%",
+        "format": "",
+        "min": "-100",
+        "max": "100",
+        "colors": [
+            "#0033ff",
+            "#ffffff",
+            "#3ccb3a"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "diff": true,
+        "className": "",
+        "x": 2420,
+        "y": 940,
+        "wires": []
+    },
+    {
+        "id": "b4dd0d8d6bfcccbf",
+        "type": "inject",
+        "z": "85c96ff92dbf9b87",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "Negative values indicate a higher value for CPLab 2, and positive for CPLab 1. For Gauges, values favouring CPLab 1 will turn to the right, and values favouring CPLab 2 will turn to the left.",
+        "payloadType": "str",
+        "x": 2450,
+        "y": 600,
+        "wires": [
+            [
+                "d1cd64a55f61b7c7"
+            ]
+        ]
+    },
+    {
+        "id": "d1cd64a55f61b7c7",
+        "type": "ui_text",
+        "z": "85c96ff92dbf9b87",
+        "group": "b08e50bf55bfa911",
+        "order": 1,
+        "width": "5",
+        "height": "2",
+        "name": "Help Text",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "style": true,
+        "font": "",
+        "fontSize": "14",
+        "color": "#000000",
+        "x": 2600,
+        "y": 600,
+        "wires": []
+    },
+    {
+        "id": "9500387c60a57d0c",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.7.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "999b7b41e9f7c6f3",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.2.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "a56a2dedfd8a174b",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.3.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "8ab7f5c25f78e4cc",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.4.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "733370d575c25424",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.5.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "1da8a1c27cea1862",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.6.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "2ad94cefa363da14",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://172.21.1.1:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "a859cf24de817a6f",
+        "type": "ui_group",
+        "z": "85c96ff92dbf9b87",
+        "name": "CPLab 1",
+        "tab": "b97a51719e89b4d2",
+        "order": 1,
+        "disp": true,
+        "width": "5",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "0a1dba116021863c",
+        "type": "ui_group",
+        "name": "CPLab 2",
+        "tab": "b97a51719e89b4d2",
+        "order": 2,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "b08e50bf55bfa911",
+        "type": "ui_group",
+        "name": "CPLAB Comparison",
+        "tab": "b97a51719e89b4d2",
+        "order": 3,
+        "disp": true,
+        "width": 6,
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "b97a51719e89b4d2",
+        "type": "ui_tab",
+        "name": "KC DASHBOARD",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    }
+]
